@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
@@ -7,7 +7,7 @@ import { organizationData } from '@/lib/mock-data';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Mail, User, UserCircle, UserCog } from 'lucide-react';
+import { ArrowLeft, Mail, User, UserCog } from 'lucide-react';
 
 export default function EmployeePage() {
   const params = useParams();
@@ -16,7 +16,6 @@ export default function EmployeePage() {
   const [manager, setManager] = useState<Employee | null>(null);
   const [directReports, setDirectReports] = useState<Employee[]>([]);
 
-  // Function to find an employee by ID and also their manager
   const findEmployeeAndManager = (
     data: Employee,
     id: string,
@@ -38,7 +37,6 @@ export default function EmployeePage() {
     return { employee: null, manager: null };
   };
 
-  // Function to find direct reports
   const findDirectReports = (data: Employee, id: string): Employee[] => {
     if (data.id === id && data.children) {
       return data.children;
@@ -71,7 +69,6 @@ export default function EmployeePage() {
     }
   }, [params.id]);
 
-  // Get initials for avatar fallback
   const getInitials = (name: string = '') => {
     return name
       .split(' ')
@@ -100,7 +97,6 @@ export default function EmployeePage() {
       </Button>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Main employee info */}
         <Card className="md:col-span-2">
           <CardHeader className="flex flex-row items-center gap-4">
             <Avatar className="h-20 w-20">
@@ -127,7 +123,6 @@ export default function EmployeePage() {
           </CardContent>
         </Card>
 
-        {/* Manager info */}
         <Card>
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
@@ -156,7 +151,6 @@ export default function EmployeePage() {
           </CardContent>
         </Card>
 
-        {/* Direct reports */}
         <Card className="md:col-span-3">
           <CardHeader>
             <CardTitle className="text-xl flex items-center gap-2">
@@ -192,4 +186,19 @@ export default function EmployeePage() {
       </div>
     </div>
   );
+}
+
+export async function generateStaticParams() {
+  function collectEmployeeIds(employee: Employee): string[] {
+    const ids = [employee.id];
+    if (employee.children) {
+      for (const child of employee.children) {
+        ids.push(...collectEmployeeIds(child));
+      }
+    }
+    return ids;
+  }
+
+  const allIds = collectEmployeeIds(organizationData);
+  return allIds.map(id => ({ id }));
 }
